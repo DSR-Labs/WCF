@@ -371,47 +371,51 @@ final class SmtpEmailTransport implements IStatusReportingEmailTransport
         foreach ($this->features as $feature) {
             $parameters = \explode(" ", $feature);
 
-            if ($parameters[0] == 'auth') {
-                // Try mechanisms in order of preference.
-                foreach (['login', 'plain'] as $method) {
-                    if (\in_array($method, $parameters)) {
-                        switch ($method) {
-                            case 'login':
-                                try {
-                                    $this->write('AUTH LOGIN');
-                                    $this->read([334]);
-                                } catch (SystemException $e) {
-                                    $authException = $e;
-                                    // try next authentication method
-                                    continue 2;
-                                }
-                                $this->write(\base64_encode($this->username));
-                                $this->lastWrite = '*redacted*';
-                                $this->read([334]);
-                                $this->write(\base64_encode($this->password));
-                                $this->lastWrite = '*redacted*';
-                                $this->read([235]);
+            if ($parameters[0] !== 'auth') {
+                continue;
+            }
 
-                                // Authentication was successful.
-                                return;
-                            case 'plain':
-                                // RFC 4616
-                                try {
-                                    $this->write('AUTH PLAIN');
-                                    $this->read([334]);
-                                } catch (SystemException $e) {
-                                    $authException = $e;
-                                    // try next authentication method
-                                    continue 2;
-                                }
-                                $this->write(\base64_encode("\0" . $this->username . "\0" . $this->password));
-                                $this->lastWrite = '*redacted*';
-                                $this->read([235]);
+            // Try mechanisms in order of preference.
+            foreach (['login', 'plain'] as $method) {
+                if (!\in_array($method, $parameters)) {
+                    continue;
+                }
 
-                                // Authentication was successful.
-                                return;
+                switch ($method) {
+                    case 'login':
+                        try {
+                            $this->write('AUTH LOGIN');
+                            $this->read([334]);
+                        } catch (SystemException $e) {
+                            $authException = $e;
+                            // try next authentication method
+                            continue 2;
                         }
-                    }
+                        $this->write(\base64_encode($this->username));
+                        $this->lastWrite = '*redacted*';
+                        $this->read([334]);
+                        $this->write(\base64_encode($this->password));
+                        $this->lastWrite = '*redacted*';
+                        $this->read([235]);
+
+                        // Authentication was successful.
+                        return;
+                    case 'plain':
+                        // RFC 4616
+                        try {
+                            $this->write('AUTH PLAIN');
+                            $this->read([334]);
+                        } catch (SystemException $e) {
+                            $authException = $e;
+                            // try next authentication method
+                            continue 2;
+                        }
+                        $this->write(\base64_encode("\0" . $this->username . "\0" . $this->password));
+                        $this->lastWrite = '*redacted*';
+                        $this->read([235]);
+
+                        // Authentication was successful.
+                        return;
                 }
 
                 // No mechanism was accepted.
