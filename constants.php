@@ -229,3 +229,4 @@
 \define('RECAPTCHA_PRIVATEKEY_V3', '');
 \define('IMAGE_CONVERT_FORMAT', 'webp');
 \define('IMAGE_STRIP_EXIF', 1);
+\define('MAIL_GOOGLE_WORKSPACE_JSON', '');

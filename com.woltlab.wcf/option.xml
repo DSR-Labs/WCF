@@ -810,12 +810,14 @@ simpleMatch:wcf.acp.option.blacklist_sfs_enable.simpleMatch]]></selectoptions>
 				<categoryname>general.mail.send</categoryname>
 				<optiontype>radioButton</optiontype>
 				<defaultvalue>php</defaultvalue>
-				<enableoptions>php:mail_use_f_param,!mail_smtp_host,!mail_smtp_port,!mail_smtp_starttls,!mail_smtp_user,!mail_smtp_password
-smtp:!mail_use_f_param,mail_smtp_host,mail_smtp_port,mail_smtp_starttls,mail_smtp_user,mail_smtp_password
-debug:!mail_use_f_param,!mail_smtp_host,!mail_smtp_port,!mail_smtp_starttls,!mail_smtp_user,!mail_smtp_password
-debugFolder:!mail_use_f_param,!mail_smtp_host,!mail_smtp_port,!mail_smtp_starttls,!mail_smtp_user,!mail_smtp_password</enableoptions>
+				<enableoptions>php:mail_use_f_param,!mail_smtp_host,!mail_smtp_port,!mail_smtp_starttls,!mail_smtp_user,!mail_smtp_password,!mail_google_workspace_json
+smtp:!mail_use_f_param,mail_smtp_host,mail_smtp_port,mail_smtp_starttls,mail_smtp_user,mail_smtp_password,!mail_google_workspace_json
+googleWorkspace:!mail_use_f_param,!mail_smtp_host,!mail_smtp_port,!mail_smtp_starttls,!mail_smtp_user,!mail_smtp_password,mail_google_workspace_json
+debug:!mail_use_f_param,!mail_smtp_host,!mail_smtp_port,!mail_smtp_starttls,!mail_smtp_user,!mail_smtp_password,!mail_google_workspace_json
+debugFolder:!mail_use_f_param,!mail_smtp_host,!mail_smtp_port,!mail_smtp_starttls,!mail_smtp_user,!mail_smtp_password,!mail_google_workspace_json</enableoptions>
 				<selectoptions>php:wcf.acp.option.mail_send_method.php
 smtp:wcf.acp.option.mail_send_method.smtp
+googleWorkspace:wcf.acp.option.mail_send_method.googleWorkspace
 debug:wcf.acp.option.mail_send_method.debug
 debugFolder:wcf.acp.option.mail_send_method.debugFolder</selectoptions>
 			</option>
@@ -850,6 +852,11 @@ encrypt:wcf.acp.option.mail_smtp_starttls.encrypt</selectoptions>
 				<categoryname>general.mail.send</categoryname>
 				<optiontype>boolean</optiontype>
 				<defaultvalue>1</defaultvalue>
+			</option>
+			<option name="mail_google_workspace_json">
+				<categoryname>general.mail.send</categoryname>
+				<optiontype>textarea</optiontype>
+				<disableAutocomplete>1</disableAutocomplete>
 			</option>
 			<!-- /general.mail.send -->
 			<!-- general.cache -->
