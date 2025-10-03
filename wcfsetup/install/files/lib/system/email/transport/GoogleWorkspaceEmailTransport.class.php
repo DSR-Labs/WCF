@@ -155,6 +155,9 @@ final class GoogleWorkspaceEmailTransport implements IStatusReportingEmailTransp
     protected function read(array $expectedCodes): array
     {
         $truncateReply = static function ($reply) {
+            // Replace line breaks with a single space for readability.
+            $reply = \str_replace("\r\n", " ", $reply);
+
             return StringUtil::truncate(
                 \preg_replace('/[\x00-\x1F\x80-\xFF]/', '.', $reply),
                 //250,
@@ -175,41 +178,9 @@ final class GoogleWorkspaceEmailTransport implements IStatusReportingEmailTransp
             if (\preg_match('/^(\d{3})([- ])(.*)$/', $data, $matches)) {
                 if ($code === null) {
                     $code = \intval($matches[1]);
-
-                    if (!\in_array($code, $expectedCodes)) {
-                        // 4xx is a transient failure
-                        if (400 <= $code && $code < 500) {
-                            throw new TransientFailure(\sprintf(
-                                "Remote SMTP server reported transient error code %d (%s) in reply to '%s' (%.3fs).",
-                                $code,
-                                $truncateReply($matches[3]),
-                                $this->lastWrite,
-                                $time
-                            ));
-                        }
-
-                        // 5xx is a permanent failure
-                        if (500 <= $code && $code < 600) {
-                            throw new PermanentFailure(\sprintf(
-                                "Remote SMTP server reported permanent error code %d (%s) in reply to '%s' (%.3fs).",
-                                $code,
-                                $truncateReply($matches[3]),
-                                $this->lastWrite,
-                                $time
-                            ));
-                        }
-
-                        throw new TransientFailure(\sprintf(
-                            "Remote SMTP server reported not expected code %d (%s) in reply to '%s' (%.3fs).",
-                            $code,
-                            $truncateReply($matches[3]),
-                            $this->lastWrite,
-                            $time
-                        ));
-                    }
                 }
 
-                if ($code == $matches[1]) {
+                if ($code === \intval($matches[1])) {
                     $reply .= \trim($matches[3]) . "\r\n";
 
                     // no more continuation lines
@@ -261,6 +232,38 @@ final class GoogleWorkspaceEmailTransport implements IStatusReportingEmailTransp
                 ));
             }
         } while (true);
+
+        if (!\in_array($code, $expectedCodes)) {
+            // 4xx is a transient failure
+            if (400 <= $code && $code < 500) {
+                throw new TransientFailure(\sprintf(
+                    "Remote SMTP server reported transient error code %d (%s) in reply to '%s' (%.3fs).",
+                    $code,
+                    $truncateReply($reply),
+                    $this->lastWrite,
+                    $time
+                ));
+            }
+
+            // 5xx is a permanent failure
+            if (500 <= $code && $code < 600) {
+                throw new PermanentFailure(\sprintf(
+                    "Remote SMTP server reported permanent error code %d (%s) in reply to '%s' (%.3fs).",
+                    $code,
+                    $truncateReply($reply),
+                    $this->lastWrite,
+                    $time
+                ));
+            }
+
+            throw new TransientFailure(\sprintf(
+                "Remote SMTP server reported not expected code %d (%s) in reply to '%s' (%.3fs).",
+                $code,
+                $truncateReply($reply),
+                $this->lastWrite,
+                $time
+            ));
+        }
 
         return [$code, $reply];
     }
